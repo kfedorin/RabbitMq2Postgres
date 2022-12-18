@@ -3,12 +3,12 @@ using RabbitConsumer.Controllers.Base;
 using RabbitConsumer.Interface;
 using RabbitConsumer.Repositories.Models;
 
-namespace GPNA.ObjectModel.Controllers
+namespace RabbitConsumer.Controllers
 {
     [Route("api/[controller]")]
-    public class BranchController : TechnologyControllerBase<Organization>
+    public class OrganizationController : TechnologyControllerBase<Organization>
     {
-        public BranchController(ITechnology<Organization> repos) : base(repos)
+        public OrganizationController(ITechnology<Organization> repos) : base(repos)
         {
         }
 

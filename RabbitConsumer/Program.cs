@@ -1,7 +1,40 @@
 using System.Reflection;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using RabbitConsumer;
 using RabbitConsumer.Interface;
+using RabbitConsumer.Repositories;
+using RabbitConsumer.Repositories.Models;
+using RabbitConsumer.Repositories.Technology;
+
+IConfiguration configuration = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json")
+    .Build();
+
+//var builder = WebApplication.CreateBuilder(args);
+
+//builder.Services.AddDbContext<RabbitTestContext>(c =>
+//{
+//    var connectionString = configuration["DbConnectionString:ConnectionStringNpgsql"];
+//    c.UseNpgsql(connectionString);
+//});
+
+//builder.Services.AddScoped<ITechnology<User>, UserRepository>();
+//builder.Services.AddScoped<ITechnology<Organization>, OrganizationRepository>();
+
+
+//builder.Services.AddMassTransit(busConfigurator =>
+//{
+//    var entryAssembly = Assembly.GetExecutingAssembly();
+
+//    busConfigurator.AddConsumers(entryAssembly);
+//    busConfigurator.UsingRabbitMq((context, busFactoryConfigurator) =>
+//    {
+//        busFactoryConfigurator.Host("rabbitmq", "/", h => { });
+
+//        busFactoryConfigurator.ConfigureEndpoints(context);
+//    });
+//});
 
 var builder = Host.CreateDefaultBuilder(args);
 
@@ -9,14 +42,21 @@ builder.ConfigureServices((hostContext, services) =>
 {
     services.AddMassTransit(busConfigurator =>
     {
-        var entryAssembly = Assembly.GetExecutingAssembly();
+        //var entryAssembly = Assembly.GetExecutingAssembly();
+    
+        busConfigurator.AddConsumer<NotificationCreatedConsumer>();
 
-        busConfigurator.AddConsumers(entryAssembly);
-        busConfigurator.UsingRabbitMq((context, busFactoryConfigurator) =>
+        busConfigurator.UsingRabbitMq((ctx, cfg) =>
         {
-            busFactoryConfigurator.Host("rabbitmq", "/", h => { });
+            cfg.Host("rabbitmq");
 
-            busFactoryConfigurator.ConfigureEndpoints(context);
+            cfg.ReceiveEndpoint("created-event", e =>
+            {
+                e.Consumer<NotificationCreatedConsumer>();
+            });
+            //busFactoryConfigurator.Host("rabbitmq", "/", h => { });
+
+            //busFactoryConfigurator.ConfigureEndpoints(context);
         });
     });
 });
@@ -42,13 +82,14 @@ builder.ConfigureServices((hostContext, services) =>
 
 
 
+
 //builder.Services.AddControllers();
 //builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+//// Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
 //{
 //    app.UseSwagger();
