@@ -30,9 +30,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Commands\UserCommand\" />
 	  <Folder Include="Dto\" />
-	  <Folder Include="Handlers\UserQuery\" />
 	</ItemGroup>
 
 </Project>

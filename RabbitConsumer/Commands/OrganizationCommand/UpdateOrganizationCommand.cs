@@ -35,7 +35,7 @@ namespace RabbitConsumer.Commands.OrganizationCommand
 
             var entity = mapper.Map<Organization>(request);
 
-            var entityToUpdate = await _dbContext.Set<Organization>().AsNoTracking()
+            await _dbContext.Set<Organization>().AsNoTracking()
                 .FirstOrDefaultAsync(e => e.Id == entity.Id, cancellationToken: cancellationToken);
 
             var updatedEntity = _dbContext.Set<Organization>().Update(entity);

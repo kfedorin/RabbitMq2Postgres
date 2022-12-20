@@ -7,13 +7,25 @@ using RabbitConsumer.Repositories.Models;
 
 namespace RabbitConsumer.Commands.OrganizationCommand
 {
-    public class DeleteOrganizationCommand : IRequest
+    public class DeleteOrganizationCommand : IRequest<bool>
     {
         [Required]
         public int Id { get; set; }
+        [Required]
+        public int IdOrganization { get; set; }
+        [Required]
+        public string FirstName { get; set; }
+        [Required]
+        public string LastName { get; set; }
+        [Required]
+        public string MiddleNane { get; set; }
+        [Required]
+        public string Phone { get; set; }
+        [Required]
+        public string Email { get; set; }
     }
 
-    public class DeleteOrganizationCommandHandler : IRequestHandler<DeleteOrganizationCommand>
+    public class DeleteOrganizationCommandHandler : IRequestHandler<DeleteOrganizationCommand, bool>
     {
         private readonly IDbContext _dbContext;
         public DeleteOrganizationCommandHandler(IDbContext dbContext) : base()
@@ -22,7 +34,7 @@ namespace RabbitConsumer.Commands.OrganizationCommand
         }
 
 
-        public async Task<Unit> Handle(DeleteOrganizationCommand request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(DeleteOrganizationCommand request, CancellationToken cancellationToken)
         {
             var mapper = new MapperConfiguration(cfg =>
             {
@@ -31,11 +43,18 @@ namespace RabbitConsumer.Commands.OrganizationCommand
 
             var entity = mapper.Map<Organization>(request);
 
-            var updatedEntity = _dbContext.Set<Organization>().Remove(entity);
+            _dbContext.Set<Organization>().Remove(entity);
 
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
-            return Unit.Value;
+            try
+            {
+                await _dbContext.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+            
+            return true;
         }
     }
 }
