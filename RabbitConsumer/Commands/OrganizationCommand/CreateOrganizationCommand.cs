@@ -4,7 +4,7 @@ using MediatR;
 using RabbitConsumer.Interface;
 using RabbitConsumer.Repositories.Models;
 
-namespace RabbitConsumer.Commands
+namespace RabbitConsumer.Commands.OrganizationCommand
 {
     public class CreateOrganizationCommand : IRequest<Organization>
     {

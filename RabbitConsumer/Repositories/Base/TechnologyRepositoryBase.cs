@@ -3,7 +3,7 @@ using RabbitConsumer.Interface;
 
 namespace RabbitConsumer.Repositories.Base
 {
-    public abstract class TechnologyRepositoryBase<T> : ITechnology<T>
+    public abstract class TechnologyRepositoryBase<T> 
         where T : EntityBase
     {
         DbContext _db;

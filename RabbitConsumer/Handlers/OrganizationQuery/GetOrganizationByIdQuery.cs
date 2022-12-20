@@ -1,9 +1,8 @@
 ﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
 using RabbitConsumer.Interface;
 using RabbitConsumer.Repositories.Models;
 
-namespace RabbitConsumer.Queries
+namespace RabbitConsumer.Handlers.OrganizationQuery
 {
     public class GetOrganizationByIdQuery : IRequest<Organization>
     {

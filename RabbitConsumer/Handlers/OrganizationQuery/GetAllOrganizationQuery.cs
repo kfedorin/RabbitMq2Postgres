@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RabbitConsumer.Interface;
 using RabbitConsumer.Repositories.Models;
 
-namespace RabbitConsumer.Queries
+namespace RabbitConsumer.Handlers.OrganizationQuery
 {
     // Query
     public class GetAllOrganizationQuery : IRequest<IEnumerable<Organization>> { }
@@ -22,10 +22,9 @@ namespace RabbitConsumer.Queries
         {
             var entityList = _dbContext.Set<Organization>().AsNoTracking();
 
-            var organizations = await entityList.ToListAsync(cancellationToken : cancellationToken);
+            var organizations = await entityList.ToListAsync(cancellationToken: cancellationToken);
 
             return organizations;
         }
     }
 }
- 

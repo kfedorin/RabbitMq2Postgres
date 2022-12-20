@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using RabbitConsumer.Commands;
-using RabbitConsumer.Queries;
+using RabbitConsumer.Commands.OrganizationCommand;
+using RabbitConsumer.Handlers.OrganizationQuery;
 
 namespace RabbitConsumer.Controllers
 {
@@ -17,7 +17,6 @@ namespace RabbitConsumer.Controllers
         public async Task<IActionResult> GetAll()
         {
             var result = await _mediator.Send(new GetAllOrganizationQuery());
-
             return Ok(result);
         }
 
@@ -25,15 +24,26 @@ namespace RabbitConsumer.Controllers
         public async Task<IActionResult> Get([FromRoute] int id)
         {
             var result = await _mediator.Send(new GetOrganizationByIdQuery(id));
-
             return Ok(result);
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(CreateOrganizationCommand newOrganization)
         {
-            var product = await _mediator.Send(new CreateOrganizationCommand(newOrganization.Name));
-            return product != null ? Created($"/organization/{product.Id}", product) : BadRequest();
+            return Ok(await _mediator.Send(newOrganization));
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> Update(UpdateOrganizationCommand organization)
+        {
+            return Ok(await _mediator.Send(organization));
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Update(int id)
+        {
+            await _mediator.Send(new DeleteOrganizationCommand() { Id = id });
+            return NoContent();
         }
     }
 }
