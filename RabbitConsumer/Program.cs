@@ -1,105 +1,59 @@
-using System.Reflection;
+using AutoMapper.Extensions.ExpressionMapping;
 using MassTransit;
+using RabbitConsumer.Services;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
-using RabbitConsumer;
+using RabbitConsumer.Controllers;
 using RabbitConsumer.Interface;
 using RabbitConsumer.Repositories;
-using RabbitConsumer.Repositories.Models;
-using RabbitConsumer.Repositories.Technology;
 
 IConfiguration configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
     .Build();
 
-//var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
-//builder.Services.AddDbContext<RabbitTestContext>(c =>
-//{
-//    var connectionString = configuration["DbConnectionString:ConnectionStringNpgsql"];
-//    c.UseNpgsql(connectionString);
-//});
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
-//builder.Services.AddScoped<ITechnology<User>, UserRepository>();
-//builder.Services.AddScoped<ITechnology<Organization>, OrganizationRepository>();
+builder.Services.AddAutoMapper(cfg =>
+    cfg.AddExpressionMapping());
 
-
-//builder.Services.AddMassTransit(busConfigurator =>
-//{
-//    var entryAssembly = Assembly.GetExecutingAssembly();
-
-//    busConfigurator.AddConsumers(entryAssembly);
-//    busConfigurator.UsingRabbitMq((context, busFactoryConfigurator) =>
-//    {
-//        busFactoryConfigurator.Host("rabbitmq", "/", h => { });
-
-//        busFactoryConfigurator.ConfigureEndpoints(context);
-//    });
-//});
-
-var builder = Host.CreateDefaultBuilder(args);
-
-builder.ConfigureServices((hostContext, services) =>
+builder.Services.AddDbContext<IDbContext, RabbitTestContext>(c =>
 {
-    services.AddMassTransit(busConfigurator =>
+    var connectionString = configuration["DbConnectionString:ConnectionStringNpgsql"];
+    c.UseNpgsql(connectionString);
+});
+
+builder.Services.AddMassTransit(x =>
+{
+    x.AddConsumer<UserConsumer>();
+
+    x.SetKebabCaseEndpointNameFormatter();
+
+    x.UsingRabbitMq((context, cfg) =>
     {
-        //var entryAssembly = Assembly.GetExecutingAssembly();
-    
-        busConfigurator.AddConsumer<NotificationCreatedConsumer>();
-
-        busConfigurator.UsingRabbitMq((ctx, cfg) =>
-        {
-            cfg.Host("rabbitmq");
-
-            cfg.ReceiveEndpoint("created-event", e =>
-            {
-                e.Consumer<NotificationCreatedConsumer>();
-            });
-            //busFactoryConfigurator.Host("rabbitmq", "/", h => { });
-
-            //busFactoryConfigurator.ConfigureEndpoints(context);
-        });
+        cfg.ConfigureEndpoints(context);
     });
 });
 
-//var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
-//{
-//    cfg.ReceiveEndpoint("created-event", e =>
-//    {
-//        e.Consumer<NotificationCreatedConsumer>();
-//    });
-//});
-
-//await busControl.StartAsync(new CancellationToken());
-//try
-//{
-//    Console.WriteLine("Press enter to exit");
-//    await Task.Run(() => Console.ReadLine());
-//}
-//finally
-//{
-//    await busControl.StopAsync();
-//}
-
-
-
-
-//builder.Services.AddControllers();
-//builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen();
+builder.Services.AddMediatR(typeof(Program));
 
 var app = builder.Build();
 
-//// Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseSwagger();
-//    app.UseSwaggerUI();
-//}
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 //app.UseHttpsRedirection();
 
-//app.UseAuthorization();
+app.UseAuthorization();
 
-//app.MapControllers();
+app.MapControllers();
 
 app.Run();
+

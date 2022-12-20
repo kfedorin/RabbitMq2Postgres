@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RabbitConsumer.Interface;
 using RabbitConsumer.Repositories.Models;
 
 namespace RabbitConsumer.Repositories;
 
-public partial class RabbitTestContext : DbContext
+public partial class RabbitTestContext : DbContext, IDbContext
+
 {
     public RabbitTestContext()
     {
