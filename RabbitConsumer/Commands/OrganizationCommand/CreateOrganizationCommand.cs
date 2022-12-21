@@ -10,23 +10,7 @@ namespace RabbitConsumer.Commands.OrganizationCommand
     {
         [Required]
         public string Name { get; set; }
-        [Required]
-        public int IdOrganization { get; set; }
-        [Required]
-        public string FirstName { get; set; }
-        [Required]
-        public string LastName { get; set; }
-        [Required]
-        public string MiddleNane { get; set; }
-        [Required]
-        public string Phone { get; set; }
-        [Required]
-        public string Email { get; set; }
 
-        public CreateOrganizationCommand(string name)
-        {
-            Name = name;
-        }
     }
 
     public class CreateOrganizationCommandHandler : IRequestHandler<CreateOrganizationCommand, Organization>

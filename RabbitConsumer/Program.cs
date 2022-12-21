@@ -6,6 +6,12 @@ using Microsoft.EntityFrameworkCore;
 using RabbitConsumer.Controllers;
 using RabbitConsumer.Interface;
 using RabbitConsumer.Repositories;
+using Serilog;
+using Swashbuckle.AspNetCore.SwaggerUI;
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateLogger();
 
 IConfiguration configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
@@ -42,18 +48,33 @@ builder.Services.AddMediatR(typeof(Program));
 
 var app = builder.Build();
 
+app.UseSwagger()
+    .UseSwaggerUI(c =>
+    {
+        c.ConfigObject = new ConfigObject
+        {
+            ShowCommonExtensions = true
+        };
+    })
+    .UseStaticFiles()
+    .UseRouting()
+    .UseEndpoints(endpoints =>
+    {
+        endpoints.MapControllers();
+    });
+
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI();
+//}
 
 //app.UseHttpsRedirection();
 
-app.UseAuthorization();
+//app.UseAuthorization();
 
-app.MapControllers();
+//app.MapControllers();
 
 app.Run();
 

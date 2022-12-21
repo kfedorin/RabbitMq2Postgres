@@ -8,13 +8,20 @@ namespace RabbitConsumer.Commands.UserCommand
 {
     public class CreateUserCommand : IRequest<User>
     {
-        [Required]
-        public string Name { get; set; }
 
-        public CreateUserCommand(string name)
-        {
-            Name = name;
-        }
+        [Required]
+        public int IdOrganization { get; set; }
+        [Required]
+        public string FirstName { get; set; }
+        [Required]
+        public string LastName { get; set; }
+        [Required]
+        public string MiddleName { get; set; }
+        [Required]
+        public string Phone { get; set; }
+        [Required]
+        public string Email { get; set; }
+
     }
 
     public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, User>
