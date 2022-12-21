@@ -1,9 +1,10 @@
+using System.Reflection;
 using AutoMapper.Extensions.ExpressionMapping;
+using FluentValidation.AspNetCore;
 using MassTransit;
 using RabbitConsumer.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using RabbitConsumer.Controllers;
 using RabbitConsumer.Interface;
 using RabbitConsumer.Repositories;
 using Serilog;
@@ -20,6 +21,13 @@ IConfiguration configuration = new ConfigurationBuilder()
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+
+builder.Services.AddFluentValidation(conf =>
+{
+    conf.RegisterValidatorsFromAssembly(typeof(Program).Assembly);
+    conf.AutomaticValidationEnabled = false;
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

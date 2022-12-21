@@ -39,10 +39,6 @@ public partial class RabbitTestContext : DbContext, IDbContext
 
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
-            entity.HasOne(d => d.Organization)
-                .WithMany(p => p.Users)
-                .HasForeignKey(d => d.IdOrganization)
-                .OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         modelBuilder.Entity<Organization>(entity =>

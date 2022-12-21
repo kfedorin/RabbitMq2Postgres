@@ -10,7 +10,5 @@ namespace RabbitConsumer.Repositories.Models
         public string MiddleName { get; set; }
         public string Phone { get; set; }
         public string Email { get; set; }
-
-        public virtual Organization? Organization { get; set; }
     }
 }

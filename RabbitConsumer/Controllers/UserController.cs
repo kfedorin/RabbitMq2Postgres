@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using FluentValidation;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using RabbitConsumer.Commands.UserCommand;
 using RabbitConsumer.Handlers.UserQuery;
@@ -10,14 +11,21 @@ namespace RabbitConsumer.Controllers
     public class UserController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly IValidator<UpdateUserCommand> _validator;
 
-        public UserController(IMediator mediator) => _mediator = mediator;
+        public UserController(IMediator mediator, IValidator<UpdateUserCommand> validator)
+        {
+            _mediator = mediator;
+            _validator = validator;
+        }
+  
 
         /// <summary>
         /// Получить всех пользователей
         /// </summary>
         /// <returns></returns>
-        [HttpGet("all")]
+        [HttpGet("GetAll")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll()
         {
             var result = await _mediator.Send(new GetAllUserQuery());
@@ -29,16 +37,35 @@ namespace RabbitConsumer.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        /// <response code="400">Ошибка запроса</response>
-        [HttpGet("{id}")]
+        /// <response code="404">Пользователь не найден</response>
+        [HttpGet("GetByIdUser")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Get([FromRoute] int id)
+        [ProducesResponseType(typeof(int), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Get(int id)
         {
             var result = await _mediator.Send(new GetUserByIdQuery(id));
 
             if (result is null)
-                return BadRequest(id);
+                return NotFound(id);
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Получить пользователей по ID организации
+        /// </summary>
+        /// <param name="idOrganization"></param>
+        /// <returns></returns>
+        /// <response code="404">Организация не найдена</response>
+        [HttpGet("GetByIdOrganization")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(int), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetByIdOrganization(int idOrganization)
+        {
+            var result = await _mediator.Send(new GetUsersByIdOrganizationQuery(idOrganization));
+
+            if (result is null)
+                return NotFound(idOrganization);
 
             return Ok(result);
         }
@@ -49,6 +76,7 @@ namespace RabbitConsumer.Controllers
         /// <param name="newUser"></param>
         /// <returns></returns>
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Create(CreateUserCommand newUser)
         {
             return Ok(await _mediator.Send(newUser));
@@ -59,9 +87,18 @@ namespace RabbitConsumer.Controllers
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
+        /// <response code="400">Ошибка запроса</response>
         [HttpPut]
-        public async Task<IActionResult> Update(UpdateUserCommand user)
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Update([FromBody] UpdateUserCommand user)
         {
+            var validation = await _validator.ValidateAsync(user);
+
+            if (!validation.IsValid)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, validation);
+            }
+
             return Ok(await _mediator.Send(user));
         }
 
@@ -70,16 +107,16 @@ namespace RabbitConsumer.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        /// <response code="400">Ошибка запроса</response>
+        /// <response code="404">Пользователь не найден</response>
         /// <response code="204">Пользователь успешно удален</response>
-        [HttpDelete("{id}")]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Update(int id)
+        [HttpDelete("DeleteByIdUser")]
+        [ProducesResponseType(typeof(int), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Delete(int id)
         {
             var result = await _mediator.Send(new DeleteUserCommand() { Id = id });
 
             if (result) return NoContent();
-            return BadRequest(id);
+            return NotFound(id);
         }
     }
 }

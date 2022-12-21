@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using AutoMapper;
+using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using RabbitConsumer.Interface;
@@ -14,16 +15,6 @@ namespace RabbitConsumer.Commands.UserCommand
 
         [Required]
         public int IdOrganization { get; set; }
-        [Required]
-        public string FirstName { get; set; }
-        [Required]
-        public string LastName { get; set; }
-        [Required]
-        public string MiddleNane { get; set; }
-        [Required]
-        public string Phone { get; set; }
-        [Required]
-        public string Email { get; set; }
 
     }
 
@@ -43,16 +34,37 @@ namespace RabbitConsumer.Commands.UserCommand
                 cfg.CreateMap<UpdateUserCommand, User>();
             }).CreateMapper();
 
+            var entityToUpdate = await _dbContext.Set<User>().AsNoTracking()
+                .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
 
-            var entity = mapper.Map<User>(request);
+            entityToUpdate.IdOrganization = request.IdOrganization;
 
-            await _dbContext.Set<User>().AsNoTracking()
-                .FirstOrDefaultAsync(e => e.Id == entity.Id, cancellationToken: cancellationToken);
+            var entity = mapper.Map<User>(entityToUpdate);
 
             var updatedEntity = _dbContext.Set<User>().Update(entity);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
             return mapper.Map<User>(updatedEntity.Entity);
+        }
+
+        public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
+        {
+            public UpdateUserCommandValidator(IDbContext dbContext)
+            {
+                RuleFor(e => e.Id)
+                    .MustAsync(async (id, cancellation) =>
+                    {
+                        return await dbContext.Set<User>()
+                            .AnyAsync(e => e.Id == id, cancellation);
+                    }).WithMessage("Пользователя с данным Id не существует");
+
+                RuleFor(e => e.IdOrganization)
+                    .MustAsync(async (idOrganization, cancellation) =>
+                    {
+                        return await dbContext.Set<Organization>()
+                            .AnyAsync(e => e.Id == idOrganization, cancellation);
+                    }).WithMessage("Организации с таким Id не существует");
+            }
         }
     }
 }

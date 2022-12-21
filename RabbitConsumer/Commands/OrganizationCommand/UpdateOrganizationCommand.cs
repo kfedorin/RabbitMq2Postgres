@@ -1,7 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using AutoMapper;
+using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using RabbitConsumer.Commands.UserCommand;
 using RabbitConsumer.Interface;
 using RabbitConsumer.Repositories.Models;
 
@@ -12,6 +15,7 @@ namespace RabbitConsumer.Commands.OrganizationCommand
         [Required]
         public int Id { get; set; }
 
+        [Required]
         public string Name { get; set; }
 
     }
@@ -33,15 +37,30 @@ namespace RabbitConsumer.Commands.OrganizationCommand
             }).CreateMapper();
 
 
-            var entity = mapper.Map<Organization>(request);
+            var entityToUpdate = await _dbContext.Set<Organization>().AsNoTracking()
+                .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
 
-            await _dbContext.Set<Organization>().AsNoTracking()
-                .FirstOrDefaultAsync(e => e.Id == entity.Id, cancellationToken: cancellationToken);
+            entityToUpdate.Name = request.Name;
+
+            var entity = mapper.Map<Organization>(entityToUpdate);
 
             var updatedEntity = _dbContext.Set<Organization>().Update(entity);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
             return mapper.Map<Organization>(updatedEntity.Entity);
+        }
+
+        public class UpdateOrganizationCommandValidator : AbstractValidator<UpdateOrganizationCommand>
+        {
+            public UpdateOrganizationCommandValidator(IDbContext dbContext)
+            {
+                RuleFor(e => e.Id)
+                    .MustAsync(async (idOrganization, cancellation) =>
+                    {
+                        return await dbContext.Set<Organization>()
+                            .AnyAsync(e => e.Id == idOrganization, cancellation);
+                    }).WithMessage("Организации с таким Id не существует");
+            }
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using AutoMapper;
+using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using RabbitConsumer.Interface;
 using RabbitConsumer.Repositories.Models;
 
@@ -48,8 +50,7 @@ namespace RabbitConsumer.Commands.UserCommand
 
             return mapper.Map<User>(createdEntity.Entity);
         }
+
     }
-
-
 
 }
