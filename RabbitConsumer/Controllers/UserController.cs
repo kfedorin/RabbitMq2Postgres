@@ -83,6 +83,11 @@ namespace RabbitConsumer.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Create(CreateUserCommand newUser)
         {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, ModelState);
+            }
+
             return Ok(await _mediator.Send(newUser));
         }
 

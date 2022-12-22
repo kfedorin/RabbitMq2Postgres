@@ -10,28 +10,28 @@ using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using RabbitConsumer.Commands.OrganizationCommand;
+using RabbitConsumer.Commands.UserCommand;
 using RabbitConsumer.Controllers;
 using RabbitConsumer.Repositories.Models;
 
 namespace RabbitConsumer.Test.ControllersTests
 {
-    public class OrganizationControllerTests
+    public class UserControllerTests
     {
         private readonly IMediator _mediator;
-        private readonly IValidator<UpdateOrganizationCommand> _validator;
+        private readonly IValidator<UpdateUserCommand> _validator;
 
-        public OrganizationControllerTests()
+        public UserControllerTests()
         {
             _mediator = A.Fake<IMediator>();
-            _validator = A.Fake<IValidator<UpdateOrganizationCommand>>();
+            _validator = A.Fake<IValidator<UpdateUserCommand>>();
         }
 
         [Fact]
-        public void OrganizationController_GetOrganizations_ReturnOK()
+        public void UserController_GetUsers_ReturnOK()
         {
-
             //Arrange
-            var controller = new OrganizationController(_mediator, _validator);
+            var controller = new UserController(_mediator, _validator);
 
             //Act
             var result = controller.GetAll();
@@ -41,14 +41,14 @@ namespace RabbitConsumer.Test.ControllersTests
         }
 
         [Fact]
-        public void OrganizationController_CreateOrganization_ReturnOK()
+        public void UserController_CreateUser_ReturnOK()
         {
             //Arrange
-            var organizationCreate = A.Fake<CreateOrganizationCommand>();
-            var controller = new OrganizationController(_mediator, _validator);
+            var userCreate = A.Fake<CreateUserCommand>();
+            var controller = new UserController(_mediator, _validator);
 
             //Act
-            var result = controller.Create(organizationCreate);
+            var result = controller.Create(userCreate);
 
             //Assert
             result.Should().NotBeNull();

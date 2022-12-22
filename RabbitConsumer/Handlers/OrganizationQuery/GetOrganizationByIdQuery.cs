@@ -31,4 +31,5 @@ namespace RabbitConsumer.Handlers.OrganizationQuery
 
         }
     }
+
 }

@@ -25,15 +25,13 @@ builder.Services.AddControllers();
 builder.Services.AddFluentValidation(conf =>
 {
     conf.RegisterValidatorsFromAssembly(typeof(Program).Assembly);
-    conf.AutomaticValidationEnabled = false;
+    conf.AutomaticValidationEnabled = true;
 });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-//builder.Services.AddAutoMapper(cfg =>
-//    cfg.AddExpressionMapping());
 
 builder.Services.AddDbContext<IDbContext, RabbitTestContext>(c =>
 {
