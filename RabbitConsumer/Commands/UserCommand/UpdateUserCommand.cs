@@ -21,30 +21,28 @@ namespace RabbitConsumer.Commands.UserCommand
     public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, User>
     {
         private readonly IDbContext _dbContext;
-        public UpdateUserCommandHandler(IDbContext dbContext) : base()
+        private readonly IMapper _mapper;
+        public UpdateUserCommandHandler(IDbContext dbContext, IMapper mapper) : base()
         {
             _dbContext = dbContext;
+            _mapper = mapper;
         }
 
 
         public async Task<User> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
         {
-            var mapper = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<UpdateUserCommand, User>();
-            }).CreateMapper();
 
             var entityToUpdate = await _dbContext.Set<User>().AsNoTracking()
                 .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
 
             entityToUpdate.IdOrganization = request.IdOrganization;
 
-            var entity = mapper.Map<User>(entityToUpdate);
+            var entity = _mapper.Map<User>(entityToUpdate);
 
             var updatedEntity = _dbContext.Set<User>().Update(entity);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            return mapper.Map<User>(updatedEntity.Entity);
+            return _mapper.Map<User>(updatedEntity.Entity);
         }
 
         public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>

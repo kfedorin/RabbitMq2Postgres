@@ -63,6 +63,18 @@ namespace RabbitConsumer.Controllers
         }
 
         /// <summary>
+        /// Добавить случайную организацию
+        /// </summary>
+        /// <param name="newOrganization"></param>
+        /// <returns></returns>
+        [HttpPost("SeedPost")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> Create(SeedOrganizationCommand newOrganization)
+        {
+            return Ok(await _mediator.Send(newOrganization));
+        }
+
+        /// <summary>
         /// Обновить организацию
         /// </summary>
         /// <param name="organization"></param>

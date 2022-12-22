@@ -29,26 +29,23 @@ namespace RabbitConsumer.Commands.UserCommand
     public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, User>
     {
         private readonly IDbContext _dbContext;
-        public CreateUserCommandHandler(IDbContext dbContext) : base()
+        private readonly IMapper _mapper;
+        public CreateUserCommandHandler(IDbContext dbContext, IMapper mapper) : base()
         {
             _dbContext = dbContext;
+            _mapper = mapper;
         }
 
 
         public async Task<User> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
-            var mapper = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<CreateUserCommand, User>();
-            }).CreateMapper();
 
-
-            var entity = mapper.Map<User>(request);
+            var entity = _mapper.Map<User>(request);
 
             var createdEntity = await _dbContext.Set<User>().AddAsync(entity, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            return mapper.Map<User>(createdEntity.Entity);
+            return _mapper.Map<User>(createdEntity.Entity);
         }
 
     }

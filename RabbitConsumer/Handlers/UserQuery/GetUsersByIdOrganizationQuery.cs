@@ -8,10 +8,14 @@ namespace RabbitConsumer.Handlers.UserQuery
     public class GetUsersByIdOrganizationQuery : IRequest<IEnumerable<User>>
     {
         public int IdOrganization { get; set; }
+        public int ItemsOnPage { get; set; }
+        public int Page { get; set; }
 
-        public GetUsersByIdOrganizationQuery(int idOrganization)
+        public GetUsersByIdOrganizationQuery(int idOrganization, int itemsOnPage, int page)
         {
             IdOrganization = idOrganization;
+            ItemsOnPage = itemsOnPage;
+            Page = page;
         }
     }
 
@@ -29,7 +33,9 @@ namespace RabbitConsumer.Handlers.UserQuery
         public async Task<IEnumerable<User>> Handle(GetUsersByIdOrganizationQuery query, CancellationToken cancellationToken)
         {
             var result = _dbContext.Set<User>().AsNoTracking().Where(c => c.IdOrganization == query.IdOrganization);
-            return result;
+
+            if (query.ItemsOnPage <= 0 || query.Page <= 0) return result;
+            return result.Skip((query.Page - 1) * query.ItemsOnPage).Take(query.ItemsOnPage).ToList();
         }
     }
 }

@@ -15,20 +15,17 @@ namespace RabbitConsumer.Commands.UserCommand
     public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, bool>
     {
         private readonly IDbContext _dbContext;
-        public DeleteUserCommandHandler(IDbContext dbContext) : base()
+        private readonly IMapper _mapper;
+        public DeleteUserCommandHandler(IDbContext dbContext, IMapper mapper) : base()
         {
             _dbContext = dbContext;
+            _mapper = mapper;
         }
 
 
         public async Task<bool> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
         {
-            var mapper = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<DeleteUserCommand, User>();
-            }).CreateMapper();
-
-            var entity = mapper.Map<User>(request);
+            var entity = _mapper.Map<User>(request);
 
             _dbContext.Set<User>().Remove(entity);
 

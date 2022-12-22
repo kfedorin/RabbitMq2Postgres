@@ -16,26 +16,28 @@ namespace RabbitConsumer.Commands.OrganizationCommand
     public class CreateOrganizationCommandHandler : IRequestHandler<CreateOrganizationCommand, Organization>
     {
         private readonly IDbContext _dbContext;
-        public CreateOrganizationCommandHandler(IDbContext dbContext) : base()
+        private readonly IMapper _mapper;
+        public CreateOrganizationCommandHandler(IDbContext dbContext, IMapper mapper) : base()
         {
             _dbContext = dbContext;
+            _mapper = mapper;
         }
 
 
         public async Task<Organization> Handle(CreateOrganizationCommand request, CancellationToken cancellationToken)
         {
-            var mapper = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<CreateOrganizationCommand, Organization>();
-            }).CreateMapper();
+            //var mapper = new MapperConfiguration(cfg =>
+            //{
+            //    cfg.CreateMap<CreateOrganizationCommand, Organization>();
+            //}).CreateMapper();
 
 
-            var entity = mapper.Map<Organization>(request);
+            var entity = _mapper.Map<Organization>(request);
 
             var createdEntity = await _dbContext.Set<Organization>().AddAsync(entity, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            return mapper.Map<Organization>(createdEntity.Entity);
+            return _mapper.Map<Organization>(createdEntity.Entity);
         }
     }
 

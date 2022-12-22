@@ -17,20 +17,18 @@ namespace RabbitConsumer.Commands.OrganizationCommand
     public class DeleteOrganizationCommandHandler : IRequestHandler<DeleteOrganizationCommand, bool>
     {
         private readonly IDbContext _dbContext;
-        public DeleteOrganizationCommandHandler(IDbContext dbContext) : base()
+        private readonly IMapper _mapper;
+        public DeleteOrganizationCommandHandler(IDbContext dbContext, IMapper mapper) : base()
         {
             _dbContext = dbContext;
+            _mapper = mapper;
         }
 
 
         public async Task<bool> Handle(DeleteOrganizationCommand request, CancellationToken cancellationToken)
         {
-            var mapper = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<DeleteOrganizationCommand, Organization>();
-            }).CreateMapper();
 
-            var entity = mapper.Map<Organization>(request);
+            var entity = _mapper.Map<Organization>(request);
 
             _dbContext.Set<Organization>().Remove(entity);
 

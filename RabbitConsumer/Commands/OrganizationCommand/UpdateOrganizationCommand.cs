@@ -23,31 +23,27 @@ namespace RabbitConsumer.Commands.OrganizationCommand
     public class UpdateOrganizationCommandHandler : IRequestHandler<UpdateOrganizationCommand, Organization>
     {
         private readonly IDbContext _dbContext;
-        public UpdateOrganizationCommandHandler(IDbContext dbContext) : base()
+        private readonly IMapper _mapper;
+        public UpdateOrganizationCommandHandler(IDbContext dbContext, IMapper mapper) : base()
         {
             _dbContext = dbContext;
+            _mapper = mapper;
         }
 
 
         public async Task<Organization> Handle(UpdateOrganizationCommand request, CancellationToken cancellationToken)
         {
-            var mapper = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<UpdateOrganizationCommand, Organization>();
-            }).CreateMapper();
-
-
             var entityToUpdate = await _dbContext.Set<Organization>().AsNoTracking()
                 .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
 
             entityToUpdate.Name = request.Name;
 
-            var entity = mapper.Map<Organization>(entityToUpdate);
+            var entity = _mapper.Map<Organization>(entityToUpdate);
 
             var updatedEntity = _dbContext.Set<Organization>().Update(entity);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            return mapper.Map<Organization>(updatedEntity.Entity);
+            return _mapper.Map<Organization>(updatedEntity.Entity);
         }
 
         public class UpdateOrganizationCommandValidator : AbstractValidator<UpdateOrganizationCommand>

@@ -31,8 +31,9 @@ builder.Services.AddFluentValidation(conf =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddAutoMapper(cfg =>
-    cfg.AddExpressionMapping());
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+//builder.Services.AddAutoMapper(cfg =>
+//    cfg.AddExpressionMapping());
 
 builder.Services.AddDbContext<IDbContext, RabbitTestContext>(c =>
 {

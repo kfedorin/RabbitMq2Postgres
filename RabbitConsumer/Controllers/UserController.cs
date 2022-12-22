@@ -1,6 +1,8 @@
-﻿using FluentValidation;
+﻿using System.ComponentModel.DataAnnotations;
+using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using RabbitConsumer.Commands.OrganizationCommand;
 using RabbitConsumer.Commands.UserCommand;
 using RabbitConsumer.Handlers.UserQuery;
 
@@ -60,9 +62,11 @@ namespace RabbitConsumer.Controllers
         [HttpGet("GetByIdOrganization")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(int), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetByIdOrganization(int idOrganization)
+        public async Task<IActionResult> GetByIdOrganization(int idOrganization,
+            [Range(0, 10000)] int itemsOnPage = 10,
+            [Range(1, 100000)] int page = 1)
         {
-            var result = await _mediator.Send(new GetUsersByIdOrganizationQuery(idOrganization));
+            var result = await _mediator.Send(new GetUsersByIdOrganizationQuery(idOrganization, itemsOnPage, page));
 
             if (result is null)
                 return NotFound(idOrganization);
@@ -78,6 +82,18 @@ namespace RabbitConsumer.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Create(CreateUserCommand newUser)
+        {
+            return Ok(await _mediator.Send(newUser));
+        }
+
+        /// <summary>
+        /// Добавить случайного пользователя
+        /// </summary>
+        /// <param name="newUser"></param>
+        /// <returns></returns>
+        [HttpPost("SeedPost")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> Create(SeedUserCommand newUser)
         {
             return Ok(await _mediator.Send(newUser));
         }
