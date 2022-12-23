@@ -1,0 +1,41 @@
+version: '3'
+services:
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management
+    ports:
+    - 5672:5672
+    - 15672:15672
+    networks:
+    - rabbitnetwork
+
+  postgres:
+    container_name: postgres
+    image: postgres
+    environment:
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=postgres
+    ports:
+    - 5432:5432
+    networks:
+    - rabbitnetwork
+
+  rabbitproducer:
+    container_name: rabbitproducer
+    image: fedorinkf/rabbitproducer
+    ports:
+    - 7444:7444
+    networks:
+    - rabbitnetwork
+
+  rabbitconsumer:
+    container_name: rabbitconsumer
+    image: fedorinkf/rabbitconsumer
+    ports:
+    - 7555:7555
+    networks:
+    - rabbitnetwork
+
+networks:
+  rabbitnetwork:
+    driver: bridge

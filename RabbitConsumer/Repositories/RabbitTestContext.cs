@@ -14,6 +14,7 @@ public partial class RabbitTestContext : DbContext, IDbContext
     public RabbitTestContext(DbContextOptions<RabbitTestContext> options)
         : base(options)
     {
+        Database.EnsureCreated();
     }
 
     public virtual DbSet<User> Users { get; set; }
