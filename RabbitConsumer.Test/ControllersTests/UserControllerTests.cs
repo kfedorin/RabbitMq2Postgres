@@ -19,19 +19,21 @@ namespace RabbitConsumer.Test.ControllersTests
     public class UserControllerTests
     {
         private readonly IMediator _mediator;
-        private readonly IValidator<UpdateUserCommand> _validator;
+        private readonly IValidator<CreateUserCommand> _validatorCreate;
+        private readonly IValidator<UpdateUserCommand> _validatorUpdate;
 
         public UserControllerTests()
         {
             _mediator = A.Fake<IMediator>();
-            _validator = A.Fake<IValidator<UpdateUserCommand>>();
+            _validatorUpdate = A.Fake<IValidator<UpdateUserCommand>>();
+            _validatorCreate = A.Fake<IValidator<CreateUserCommand>>();
         }
 
         [Fact]
         public void UserController_GetUsers_ReturnOK()
         {
             //Arrange
-            var controller = new UserController(_mediator, _validator);
+            var controller = new UserController(_mediator, _validatorCreate, _validatorUpdate);
 
             //Act
             var result = controller.GetAll();
@@ -45,7 +47,7 @@ namespace RabbitConsumer.Test.ControllersTests
         {
             //Arrange
             var userCreate = A.Fake<CreateUserCommand>();
-            var controller = new UserController(_mediator, _validator);
+            var controller = new UserController(_mediator, _validatorCreate, _validatorUpdate);
 
             //Act
             var result = controller.Create(userCreate);

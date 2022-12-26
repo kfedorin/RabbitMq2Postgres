@@ -3,6 +3,7 @@ using MassTransit;
 using RabbitConsumer.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using RabbitConsumer.Commands.OrganizationCommand;
 using RabbitConsumer.Commands.UserCommand;
 using RabbitConsumer.Interface;
 using RabbitConsumer.Repositories;
@@ -20,7 +21,7 @@ IConfiguration configuration = new ConfigurationBuilder()
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-
+builder.Services.AddScoped<IValidator<UpdateOrganizationCommand>, UpdateOrganizationCommandHandler.UpdateOrganizationCommandValidator>();
 builder.Services.AddScoped<IValidator<CreateUserCommand>, CreateUserCommandHandler.CreateUserCommandValidator>();
 builder.Services.AddScoped<IValidator<UpdateUserCommand>, UpdateUserCommandHandler.UpdateUserCommandValidator>();
 
