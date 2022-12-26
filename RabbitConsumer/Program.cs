@@ -1,10 +1,9 @@
-using System.Reflection;
-using AutoMapper.Extensions.ExpressionMapping;
-using FluentValidation.AspNetCore;
+using FluentValidation;
 using MassTransit;
 using RabbitConsumer.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using RabbitConsumer.Commands.UserCommand;
 using RabbitConsumer.Interface;
 using RabbitConsumer.Repositories;
 using Serilog;
@@ -22,11 +21,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddFluentValidation(conf =>
-{
-    conf.RegisterValidatorsFromAssembly(typeof(Program).Assembly);
-    conf.AutomaticValidationEnabled = true;
-});
+builder.Services.AddScoped<IValidator<CreateUserCommand>, CreateUserCommandHandler.CreateUserCommandValidator>();
+builder.Services.AddScoped<IValidator<UpdateUserCommand>, UpdateUserCommandHandler.UpdateUserCommandValidator>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -69,19 +65,6 @@ app.UseSwagger()
     {
         endpoints.MapControllers();
     });
-
-// Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseSwagger();
-//    app.UseSwaggerUI();
-//}
-
-//app.UseHttpsRedirection();
-
-//app.UseAuthorization();
-
-//app.MapControllers();
 
 app.Run();
 

@@ -13,12 +13,14 @@ namespace RabbitConsumer.Controllers
     public class UserController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly IValidator<UpdateUserCommand> _validator;
+        private readonly IValidator<CreateUserCommand> _validatorCreate;
+        private readonly IValidator<UpdateUserCommand> _validatorUpdate ;
 
-        public UserController(IMediator mediator, IValidator<UpdateUserCommand> validator)
+        public UserController(IMediator mediator, IValidator<CreateUserCommand> validatorCreate, IValidator<UpdateUserCommand> validatorUpdate)
         {
             _mediator = mediator;
-            _validator = validator;
+            _validatorCreate = validatorCreate;
+            _validatorUpdate = validatorUpdate;
         }
   
 
@@ -83,9 +85,16 @@ namespace RabbitConsumer.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Create(CreateUserCommand newUser)
         {
-            if (!ModelState.IsValid)
+            //if (!ModelState.IsValid)
+            //{
+            //    return StatusCode(StatusCodes.Status400BadRequest, ModelState);
+            //}
+
+            var validation = _validatorCreate.Validate(newUser);
+
+            if (!validation.IsValid)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, ModelState);
+                return StatusCode(StatusCodes.Status400BadRequest, validation);
             }
 
             return Ok(await _mediator.Send(newUser));
@@ -113,7 +122,8 @@ namespace RabbitConsumer.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Update([FromBody] UpdateUserCommand user)
         {
-            var validation = await _validator.ValidateAsync(user);
+            //var validationResult = await validator.ValidateAsync(product);
+            var validation = await _validatorUpdate.ValidateAsync(user);
 
             if (!validation.IsValid)
             {
